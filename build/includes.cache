@@ -1,0 +1,62 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\standard"
+  },
+  {
+    "Sourcefile": "d:\\neturalData_aws\\build\\sketch\\neturalData_aws.ino.cpp",
+    "Include": "DHT11.h",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\libraries\\DHT11_library"
+  },
+  {
+    "Sourcefile": "d:\\neturalData_aws\\build\\sketch\\neturalData_aws.ino.cpp",
+    "Include": "Adafruit_BMP085.h",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\libraries\\Adafruit-BMP085-Library-master"
+  },
+  {
+    "Sourcefile": "d:\\neturalData_aws\\build\\sketch\\neturalData_aws.ino.cpp",
+    "Include": "Wire.h",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\Wire\\src"
+  },
+  {
+    "Sourcefile": "d:\\neturalData_aws\\build\\sketch\\neturalData_aws.ino.cpp",
+    "Include": "LiquidCrystal_I2C.h",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\libraries\\LiquidCrystal_I2C-master"
+  },
+  {
+    "Sourcefile": "d:\\neturalData_aws\\build\\sketch\\neturalData_aws.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Program Files (x86)\\Arduino\\libraries\\DHT11_library\\DHT11.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Program Files (x86)\\Arduino\\libraries\\Adafruit-BMP085-Library-master\\Adafruit_BMP085.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\Wire\\src\\Wire.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\Wire\\src\\utility\\twi.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Program Files (x86)\\Arduino\\libraries\\LiquidCrystal_I2C-master\\LiquidCrystal_I2C.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]

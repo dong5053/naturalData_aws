@@ -1,0 +1,6 @@
+{
+    "sketch": "neturalData_aws.ino",
+    "board": "arduino:avr:uno",
+    "port": "COM5",
+    "output": ".\\build"
+}

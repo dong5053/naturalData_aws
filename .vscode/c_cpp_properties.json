@@ -1,0 +1,41 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\Program Files (x86)\\Arduino\\tools\\**",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr\\avr\\include", // 추가
+                "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr\\lib\\gCc\\avr\\7.3.0\\include\\**", // 추가 - 자신의 PC 경로 확인 필요
+                "C:\\Program Files (x86)\\Arduino\\libraries\\DHT11_library\\**",
+                "C:\\Program Files (x86)\\Arduino\\libraries\\LiquidCrystal_I2C-master\\**",
+                "C:\\Program Files (x86)\\Arduino\\libraries\\Adafruit-BMP085-Library-master\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\ITEADLIB_Arduino_WeeESP8266-master\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\ESP8266WiFi\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\tools\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\esp8266\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\bootloaders\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\Servo\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\aws-sdk-arduino-master\\aws-sdk-arduino-master\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\aws-mqtt-websockets-master\\aws-mqtt-websockets-master\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\arduinoWebSockets-master\\arduinoWebSockets-master\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\arduino_1.0.0\\MQTTClient\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\Hash\\**",
+                "C:\\Users\\danma\\Documents\\Arduino\\libraries\\Arduino-master\\**"
+                //"C:\\Users\\danma\\Documents\\Arduino\\libraries\\**",
+                //"‪C:\\Users\\danma\\Documents\\Arduino\\libraries\\tools\\sdk\\libc\\xtensa-lx106-elf\\include\\sys\\**"
+            ],
+            "forcedInclude": [
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "defines": [
+                "USBCON" // serial 클래스 쓸경우 Include 에러 방지
+            ],
+            "compilerPath": "D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.24.28314/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
