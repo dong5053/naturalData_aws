@@ -1,3 +1,4 @@
+// Regist Library
 #include <DHT11.h>
 #include <Adafruit_BMP085.h>
 #include <LiquidCrystal_I2C.h>
@@ -7,211 +8,195 @@
 #include <stdlib.h>
 
 // Sensor Pin Number
-#define dustSensor 2      // ¹Ì¼¼¸ÕÁö ¼¾¼­
+#define dustSensor 2      // ë¯¸ì„¸ë¨¼ì§€ ì„¼ì„œ
 #define ledGREEN 3        // Green LED
 #define ledRED 4          // Red LED
-#define ultrasonic_Trig 5 // ÃÊÀ½ÆÄ¼¾¼­ (Trig) => Ãâ·Â
-#define ultrasonic_Echo 6 // ÃÊÀ½ÆÄ¼¾¼­ (Echo) => ÀÔ·Â
-#define temper_Hum 8      // ¿Â½Àµµ ¼¾¼­
-//#define wifi_RX 10              // WIFI ¸ğµâ RX(¼ö½Å)
-//#define wifi_TX 11              // WIFI ¸ğµâ TX(¼Û½Å)
-#define illuminSensor A0      // Á¶µµ¼¾¼­
-#define gasSensor A1          // °¡½º¼¾¼­
-#define pressureSensor_SDA A4 // ´ë±â¾Ğ¼¾¼­ SDA
-#define pressureSensor_SCL A5 // ´ë±â¾Ğ¼¾¼­ SCL
-//#define port    443     // IOT Åë½ÅÇÒ Æ÷Æ®¹øÈ£
-
-// I2C Data Type
-#define DST "DST" // ¹Ì¼¾¸ÕÁö µ¥ÀÌÅÍ
-#define UTW "UTW" // ÃÊÀ½ÆÄ¼¾¼­ µ¥ÀÌÅÍ
-#define TPH "TPH" // ¿Â½Àµµ¼¾¼­ µ¥ÀÌÅÍ
-#define ILM "ILM" // Á¶µµ¼¾¼­ µ¥ÀÌÅÍ
-#define GAS "GAS" // °¡½º¼¾¼­ µ¥ÀÌÅÍ
-#define PSS "PSS" // ´ë±â¾Ğ¼¾¼­ µ¥ÀÌÅÍ
+#define ultrasonic_Trig 5 // ì´ˆìŒíŒŒì„¼ì„œ (Trig) => ì¶œë ¥
+#define ultrasonic_Echo 6 // ì´ˆìŒíŒŒì„¼ì„œ (Echo) => ì…ë ¥
+#define temper_Hum 8      // ì˜¨ìŠµë„ ì„¼ì„œ
+#define illuminSensor A0      // ì¡°ë„ì„¼ì„œ
+#define gasSensor A1          // ê°€ìŠ¤ì„¼ì„œ
+#define pressureSensor_SDA A4 // ëŒ€ê¸°ì••ì„¼ì„œ SDA
+#define pressureSensor_SCL A5 // ëŒ€ê¸°ì••ì„¼ì„œ SCL
 
 typedef struct
 {
-  float temp = 0.0, humi = 0.0; // ¿Âµµ, ½Àµµ º¯¼ö
+  float temp = 0.0, humi = 0.0; // ì˜¨ë„, ìŠµë„ ë³€ìˆ˜
 } TemperHumiSensor;
 
 typedef struct
 {
-  float Ftemperature = 0.0; // ¿Âµµ ÃøÁ¤ °ª
-  float Fpressure = 0.0;    // ±â¾Ğ ÃøÁ¤ °ª
-  float Faltitude = 0.0;    // °íµµ ÃøÁ¤ °ª
+  float Ftemperature = 0.0; // ì˜¨ë„ ì¸¡ì • ê°’
+  float Fpressure = 0.0;    // ê¸°ì•• ì¸¡ì • ê°’
+  float Faltitude = 0.0;    // ê³ ë„ ì¸¡ì • ê°’
 
-  char CAtemperature[20] = ""; // ¿Âµµ
-  char CApressure[20] = "";    // ±â¾Ğ
-  char CAaltitude[20] = "";    // °íµµ
+  char CAtemperature[20] = ""; // ì˜¨ë„
+  char CApressure[20] = "";    // ê¸°ì••
+  char CAaltitude[20] = "";    // ê³ ë„
   char CAbuffer[128] = "";
 } PressureSensor;
 
 typedef struct
 {
-  TemperHumiSensor ths;        // ¿Â½Àµµ
-  char CAtemperature[20] = ""; // ¿Âµµ(´ë±â¾Ğ¼¾¼­)
-  char CApressure[20] = "";    // ±â¾Ğ(´ë±â¾Ğ¼¾¼­)
-  char CAaltitude[20] = "";    // °íµµ(´ë±â¾Ğ¼¾¼­)
-  int distance = 0;            // ÃÊÀ½ÆÄ¼¾¼­ °Å¸®
-  int illumin_Value = 0;       // Á¶µµ¼¾¼­ °ª
-  float ppm = 0.0;             // ÀÏ»êÈ­Åº¼Ò °ª
-  float dustDensity = 0.0;     // ¹Ì¼¼¸ÕÁö °ª
-} NaturalData;                 // ¼öÁıµÈ È¯°æ µ¥ÀÌÅÍ Á¤º¸¸¦ ÀúÀå ¹× ¾÷µ¥ÀÌÆ®ÇÒ ±¸Á¶Ã¼
+  TemperHumiSensor ths;        // ì˜¨ìŠµë„
+  char CAtemperature[20] = ""; // ì˜¨ë„(ëŒ€ê¸°ì••ì„¼ì„œ)
+  char CApressure[20] = "";    // ê¸°ì••(ëŒ€ê¸°ì••ì„¼ì„œ)
+  char CAaltitude[20] = "";    // ê³ ë„(ëŒ€ê¸°ì••ì„¼ì„œ)
+  int distance = 0;            // ì´ˆìŒíŒŒì„¼ì„œ ê±°ë¦¬
+  int illumin_Value = 0;       // ì¡°ë„ì„¼ì„œ ê°’
+  float ppm = 0.0;             // ì¼ì‚°í™”íƒ„ì†Œ ê°’
+  float dustDensity = 0.0;     // ë¯¸ì„¸ë¨¼ì§€ ê°’
+} NaturalData;                 // ìˆ˜ì§‘ëœ í™˜ê²½ ë°ì´í„° ì •ë³´ë¥¼ ì €ì¥ ë° ì—…ë°ì´íŠ¸í•  êµ¬ì¡°ì²´
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-String buf = "";        // I2C ¼Û/¼ö½Å ¹öÆÛ
-String sensorData = ""; // ¼¾¼­ µ¥ÀÌÅÍ °ª
-int dataSize = 0;       // µ¥ÀÌÅÍÀÇ ±æÀÌ
-NaturalData clt_dt;     // È¯°æµ¥ÀÌÅÍ Á¤º¸¸¦ ´ãÀ» ±¸Á¶Ã¼ ¼±¾ğ
-bool update = false;    // È¯°æ µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® ¿©ºÎ(¼öÁı¿Ï·á true / ¼öÁı Áß false)
+String buf = "";              // I2C ì†¡/ìˆ˜ì‹  ë²„í¼
+String sensorData = "";       // ì„¼ì„œ ë°ì´í„° ê°’
+int dataSize = 0;             // ë°ì´í„°ì˜ ê¸¸ì´
+NaturalData clt_dt;           // í™˜ê²½ë°ì´í„° ì •ë³´ë¥¼ ë‹´ì„ êµ¬ì¡°ì²´ ì„ ì–¸
+bool update = false;          // í™˜ê²½ ë°ì´í„° ì—…ë°ì´íŠ¸ ì—¬ë¶€(ìˆ˜ì§‘ì™„ë£Œ true / ìˆ˜ì§‘ ì¤‘ false)
 
 void setup()
 {
-  Serial.begin(9600);                // Åë½Å ¼Óµµ ¼³Á¤
-  Serial.println("Start, Arduino!"); // ½Ã¸®¾ó Æ÷Æ® TX·Î Hello, Arduino! Ãâ·Â
-  Wire.begin(8);                     // join i2c bus with address 8 //
-  Wire.onReceive(receiveEvent);      // register receive event //
-  Wire.onRequest(requestEvent);      // register request event //
-  pinMode(ledRED, OUTPUT);           // LEDÇÉ Ãâ·Â¸ğµå
-  pinMode(ledGREEN, OUTPUT);
-  pinMode(ultrasonic_Trig, OUTPUT); // ÃÊÀ½ÆÄ¼¾¼­ Ãâ·ÂÇÉ ¼³Á¤
-  pinMode(ultrasonic_Echo, INPUT);  // ÃÊÀ½ÆÄ¼¾¼­ ÀÔ·ÂÇÉ ¼³Á¤
-  pinMode(gasSensor, INPUT);
-  initLCD();
-  Serial.println("Initializing I2C..."); // I2C Åë½Å ¿¬°áÈ®ÀÎ
+  Serial.begin(9600);                // í†µì‹  ì†ë„ ì„¤ì •
+  Serial.println("Start, Arduino!"); // ì‹œë¦¬ì–¼ í¬íŠ¸ TXë¡œ Start, Arduino! ì¶œë ¥
+  Wire.begin(8);                     // I2C BUS 8ë²ˆìœ¼ë¡œ ì§€ì •, ìŠ¬ë ˆì´ë¸Œë¡œ ë“±ë¡
+  Wire.onReceive(receiveEvent);      // I2C ìˆ˜ì‹ ì‹œ í˜¸ì¶œë  í•¨ìˆ˜ ë“±ë¡
+  Wire.onRequest(requestEvent);      // I2C ì†¡ì‹  ìš”ì²­ì‹œ í˜¸ì¶œë  í•¨ìˆ˜ ë“±ë¡
+  pinMode(ledRED, OUTPUT);           // LEDí•€ ì¶œë ¥ëª¨ë“œ, REDëŠ” I2C í†µì‹ ì‹œ ì‚¬ìš©
+  pinMode(ledGREEN, OUTPUT);         // LEDí•€ ì¶œë ¥ëª¨ë“œ, GREENì€ ì„¼ì„œ ìˆ˜ì§‘ì‹œ ì‚¬ìš©
+  pinMode(ultrasonic_Trig, OUTPUT); // ì´ˆìŒíŒŒì„¼ì„œ ì¶œë ¥í•€ ì„¤ì •
+  pinMode(ultrasonic_Echo, INPUT);  // ì´ˆìŒíŒŒì„¼ì„œ ì…ë ¥í•€ ì„¤ì •
+  pinMode(gasSensor, INPUT);        // ê°€ìŠ¤ì„¼ì„œ ì…ë ¥í•€ ì„¤ì •
+  initLCD();                        // LCD ì´ˆê¸°í™”
+  Serial.println("Initializing I2C...");      // I2C í†µì‹  ì—°ê²°í™•ì¸  
   delay(3000);
 }
 
 void loop()
 {
   void *ptr = NULL;
-  update = false;
-
+  update = false;         // í™˜ê²½ ë°ì´í„° ì—…ë°ì´íŠ¸ ì—¬ë¶€
+  
   delay(2000);
-  digitalWrite(ledGREEN, HIGH);                      // LED ON
-  printLCD(ptr = TempHum_Check(), temper_Hum);       // ¿Â½Àµµ¼¾¼­ ÃøÁ¤ ¹× Ãâ·Â
-  clt_dt.ths.humi = ((TemperHumiSensor *)ptr)->humi; // ½Àµµ °ª ¾÷µ¥ÀÌÆ®
-  clt_dt.ths.temp = ((TemperHumiSensor *)ptr)->temp; // ¿Âµµ °ª ¾÷µ¥ÀÌÆ®
-  delay(2000);
-  digitalWrite(ledGREEN, LOW); // LED OFF
-  free(ptr);
-
-  digitalWrite(ledGREEN, HIGH);                            // LED ON
-  printLCD(ptr = UltrasonicWave_Check(), ultrasonic_Trig); // ÃÊÀ½ÆÄ¼¾¼­ ÃøÁ¤ ¹× Ãâ·Â
-  clt_dt.distance = *(int *)ptr;                           // ÃÊÀ½ÆÄ¼¾¼­ °ª ¾÷µ¥ÀÌÆ®
+  digitalWrite(ledGREEN, HIGH);   // LED ON
+  printLCD(ptr = TempHum_Check(), temper_Hum);            // ì˜¨ìŠµë„ì„¼ì„œ ì¸¡ì • ë° ì¶œë ¥
+  clt_dt.ths.humi = ((TemperHumiSensor *)ptr)->humi;      // ìŠµë„ ê°’ ì—…ë°ì´íŠ¸
+  clt_dt.ths.temp = ((TemperHumiSensor *)ptr)->temp;      // ì˜¨ë„ ê°’ ì—…ë°ì´íŠ¸
   delay(2000);
   digitalWrite(ledGREEN, LOW); // LED OFF
   free(ptr);
 
-  digitalWrite(ledGREEN, HIGH);                                    // LED ON
-  printLCD(ptr = Illuminance_Check(illuminSensor), illuminSensor); // Á¶µµ¼¾¼­ ÃøÁ¤ ¹× Ãâ·Â
-  clt_dt.illumin_Value = *(int *)ptr;                              // Á¶µµ °ª ¾÷µ¥ÀÌÆ®
+  digitalWrite(ledGREEN, HIGH); // LED ON
+  printLCD(ptr = UltrasonicWave_Check(), ultrasonic_Trig);    // ì´ˆìŒíŒŒì„¼ì„œ ì¸¡ì • ë° ì¶œë ¥
+  clt_dt.distance = *(int *)ptr;                              // ì´ˆìŒíŒŒì„¼ì„œ ê°’ ì—…ë°ì´íŠ¸
+  delay(2000);
+  digitalWrite(ledGREEN, LOW);  // LED OFF
+  free(ptr);
+
+  digitalWrite(ledGREEN, HIGH); // LED ON
+  printLCD(ptr = Illuminance_Check(illuminSensor), illuminSensor);    // ì¡°ë„ì„¼ì„œ ì¸¡ì • ë° ì¶œë ¥
+  clt_dt.illumin_Value = *(int *)ptr;                                 // ì¡°ë„ ê°’ ì—…ë°ì´íŠ¸
+  delay(2000);
+  digitalWrite(ledGREEN, LOW);  // LED OFF
+  free(ptr);
+
+  digitalWrite(ledGREEN, HIGH); // LED ON
+  printLCD(ptr = Gas_Check(gasSensor), gasSensor);            // ì¼ì‚°í™”íƒ„ì†Œì„¼ì„œ ì¸¡ì • ë° ì¶œë ¥
+  clt_dt.ppm = *(float *)ptr;                                  // ì¼ì‚°í™”íƒ„ì†Œ ê°’ ì—…ë°ì´íŠ¸
   delay(2000);
   digitalWrite(ledGREEN, LOW); // LED OFF
   free(ptr);
 
-  digitalWrite(ledGREEN, HIGH);                    // LED ON
-  printLCD(ptr = Gas_Check(gasSensor), gasSensor); // ÀÏ»êÈ­Åº¼Ò¼¾¼­ ÃøÁ¤ ¹× Ãâ·Â
-  clt_dt.ppm = *(float *)ptr;                      // ÀÏ»êÈ­Åº¼Ò °ª ¾÷µ¥ÀÌÆ®
+  digitalWrite(ledGREEN, HIGH); // LED ON
+  printLCD(ptr = DustDensity_Check(), dustSensor);            // ë¯¸ì„¸ë¨¼ì§€ì„¼ì„œ ì¸¡ì • ë° ì¶œë ¥
+  clt_dt.dustDensity = *(float *)ptr;                         // ë¯¸ì„¸ë¨¼ì§€ ê°’ ì—…ë°ì´íŠ¸
   delay(2000);
   digitalWrite(ledGREEN, LOW); // LED OFF
   free(ptr);
 
-  digitalWrite(ledGREEN, HIGH);                    // LED ON
-  printLCD(ptr = DustDensity_Check(), dustSensor); // ¹Ì¼¼¸ÕÁö¼¾¼­ ÃøÁ¤ ¹× Ãâ·Â
-  clt_dt.dustDensity = *(float *)ptr;              // ¹Ì¼¼¸ÕÁö °ª ¾÷µ¥ÀÌÆ®
+  digitalWrite(ledGREEN, HIGH); // LED ON
+  printLCD(ptr = Pressure_Check(), pressureSensor_SDA);                   // ëŒ€ê¸°ì••ì„¼ì„œ ì¸¡ì • ë° ì¶œë ¥
+  strcpy(clt_dt.CAtemperature, ((PressureSensor *)ptr)->CAtemperature);   // ì˜¨ë„ ê°’ ì—…ë°ì´íŠ¸
+  strcpy(clt_dt.CApressure, ((PressureSensor *)ptr)->CApressure);   // ê¸°ì•• ê°’ ì—…ë°ì´íŠ¸
+  strcpy(clt_dt.CAaltitude, ((PressureSensor *)ptr)->CAaltitude);   // ê³ ë„ ê°’ ì—…ë°ì´íŠ¸
   delay(2000);
   digitalWrite(ledGREEN, LOW); // LED OFF
   free(ptr);
 
-  digitalWrite(ledGREEN, HIGH);                                         // LED ON
-  printLCD(ptr = Pressure_Check(), pressureSensor_SDA);                 // ´ë±â¾Ğ¼¾¼­ ÃøÁ¤ ¹× Ãâ·Â
-  strcpy(clt_dt.CAtemperature, ((PressureSensor *)ptr)->CAtemperature); // ¿Âµµ °ª ¾÷µ¥ÀÌÆ®
-  strcpy(clt_dt.CApressure, ((PressureSensor *)ptr)->CApressure);       // ±â¾Ğ °ª ¾÷µ¥ÀÌÆ®
-  strcpy(clt_dt.CAaltitude, ((PressureSensor *)ptr)->CAaltitude);       // °íµµ °ª ¾÷µ¥ÀÌÆ®
-  delay(2000);
-  digitalWrite(ledGREEN, LOW); // LED OFF
-  free(ptr);
-
-  update = true; // È¯°æ µ¥ÀÌÅÍ Á¤º¸ ¾÷µ¥ÀÌÆ® ¿Ï·á
+  update = true;          // í™˜ê²½ ë°ì´í„° ì •ë³´ ì—…ë°ì´íŠ¸ ì™„ë£Œ
   Serial.println("All Sensor Data Update Complete !");
   Serial.println("=========================================================");
 
-  while (update == true) // NodeMcu¿¡¼­ µ¥ÀÌÅÍ¸¦ ¹Ş¾Æ°¥ ¼ö ÀÖµµ·Ï ´ë±â
+  while(update == true)    // NodeMcuì—ì„œ ë°ì´í„°ë¥¼ ë°›ì•„ê°ˆ ìˆ˜ ìˆë„ë¡ ëŒ€ê¸°
     delay(2000);
   buf = "";
 }
 
-int *UltrasonicWave_Check() // ÃÊÀ½ÆÄ ¼¾¼­ ÃøÁ¤
+int *UltrasonicWave_Check() // ì´ˆìŒíŒŒ ì„¼ì„œ ì¸¡ì •
 {
   int *distance = (int *)malloc(sizeof(int));
   digitalWrite(ultrasonic_Trig, HIGH);
   delayMicroseconds(30);
   digitalWrite(ultrasonic_Trig, LOW);
 
-  *distance = pulseIn(ultrasonic_Echo, HIGH) * 340 / 2 / 10000; // echoÇÉÀ¸·Î µé¾î¿Â ½ÅÈ£¸¦ ¸¶ÀÌÅ©·Î ´ÜÀ§·Î º¯È¯
-  // À½ÆÄÀÇ ¼Óµµ ÃÊ´ç 340m / 2 / cm º¯È¯
+  *distance = pulseIn(ultrasonic_Echo, HIGH) * 340 / 2 / 10000; // echoí•€ìœ¼ë¡œ ë“¤ì–´ì˜¨ ì‹ í˜¸ë¥¼ ë§ˆì´í¬ë¡œ ë‹¨ìœ„ë¡œ ë³€í™˜
+  // ìŒíŒŒì˜ ì†ë„ ì´ˆë‹¹ 340m / 2 / cm ë³€í™˜
   delay(1000);
 
   return distance;
 }
 
-TemperHumiSensor *TempHum_Check() // ¿Â½Àµµ ¼¾¼­ ÃøÁ¤
+TemperHumiSensor *TempHum_Check() // ì˜¨ìŠµë„ ì„¼ì„œ ì¸¡ì •
 {
   DHT11 dht11(temper_Hum);
   TemperHumiSensor *ths = (TemperHumiSensor *)malloc(sizeof(TemperHumiSensor));
-  dht11.read(ths->humi, ths->temp); // ÃøÁ¤
+  dht11.read(ths->humi, ths->temp); // ì¸¡ì •
   delay(1000);
 
   return ths;
 }
 
-int *Illuminance_Check(int analogPinNum) // Á¶µµ ÃøÁ¤
+int *Illuminance_Check(int analogPinNum) // ì¡°ë„ ì¸¡ì •
 {
   int *illumin_Value = (int *)malloc(sizeof(int));
   *illumin_Value = analogRead(analogPinNum);
-  delay(1000); // ÃøÁ¤ µô·¹ÀÌ
+  delay(1000); // ì¸¡ì • ë”œë ˆì´
 
   return illumin_Value;
 }
 
-float *Gas_Check(int analogPinNum) // ÀÏ»êÈ­Åº¼Ò ÃøÁ¤
+float *Gas_Check(int analogPinNum) // ì¼ì‚°í™”íƒ„ì†Œ ì¸¡ì •
 {
   float RS_gas = 0;
   float ratio = 0;
   float sensor_volt = 0;
-  float R0 = 7200.0; // ±ú²ıÇÑ °ø±â¿¡¼­ÀÇ ¼¾¼­ ÀúÇ×°ª (2K¿È ±âÁØ)
+  float R0 = 7200.0; // ê¹¨ë—í•œ ê³µê¸°ì—ì„œì˜ ì„¼ì„œ ì €í•­ê°’ (2Kì˜´ ê¸°ì¤€)
   float gas_Value = analogRead(analogPinNum);
 
   sensor_volt = gas_Value / 1024 * 5.0;
-  RS_gas = (5.0 - sensor_volt) / sensor_volt; // 5V Àü¾Ğ ±âÁØ
+  RS_gas = (5.0 - sensor_volt) / sensor_volt; // 5V ì „ì•• ê¸°ì¤€
   ratio = RS_gas / R0;                        //Replace R0 with the value found using the sketch above
   float x = 1538.46 * ratio;
   float *ppm = (float *)malloc(sizeof(float));
-  *ppm = pow(x, -1.709); // PPM°ª °è»ê
+  *ppm = pow(x, -1.709); // PPMê°’ ê³„ì‚°
   delay(1000);
 
   return ppm;
 }
 
-float *DustDensity_Check() // ¹Ì¼¼¸ÕÁö ÃøÁ¤
+float *DustDensity_Check() // ë¯¸ì„¸ë¨¼ì§€ ì¸¡ì •
 {
-  // ±¹Á¦ ¹Ì¼¼¸ÕÁö³óµµ¿¡ µû¸¥ °æ°è´Ü°è ±âÁØºĞ·ù
-  // 30ug/m^3 ÀÌÇÏ : ÁÁÀ½ / 30~80ug/m^3 : º¸Åë / 80~150ug/m^3 : ³ª»İ / 150ug/m^3 ÃÊ°ú : ¸Å¿ì ³ª»İ
+  // êµ­ì œ ë¯¸ì„¸ë¨¼ì§€ë†ë„ì— ë”°ë¥¸ ê²½ê³„ë‹¨ê³„ ê¸°ì¤€ë¶„ë¥˜
+  // 30ug/m^3 ì´í•˜ : ì¢‹ìŒ / 30~80ug/m^3 : ë³´í†µ / 80~150ug/m^3 : ë‚˜ì¨ / 150ug/m^3 ì´ˆê³¼ : ë§¤ìš° ë‚˜ì¨
   float ratio = 0;
   float concentration = 0;
-  float *dustDensity = (float *)malloc(sizeof(float)); // ¹Ì¼¼¸ÕÁö ¹Ğµµ
-  unsigned long sampletime_ms = 2000;                  // ¹Ì¼¼¸ÕÁö ¼¾¼­ÀÇ ÃøÁ¤½Ã°£
+  float *dustDensity = (float *)malloc(sizeof(float)); // ë¯¸ì„¸ë¨¼ì§€ ë°€ë„
+  unsigned long sampletime_ms = 2000;                  // ë¯¸ì„¸ë¨¼ì§€ ì„¼ì„œì˜ ì¸¡ì •ì‹œê°„
   float duration = 0.0;
-  /* for (int i = 4; i > 0; i--) // Á¤È®ÇÑ ÃøÁ¤À» À§ÇØ ¿©·¯¹ø ÆŞ½º°ªÀ» ÀĞÀ½
-  {
-    duration = pulseIn(dustSensor, LOW); // Pin¿¡¼­ LOW°¡ µÉ¶§ ÆŞ½º°ªÀ» ÀĞÀ½
-    delay(500);
-  } */
 
-  while (duration == 0) // Á¤È®ÇÑ ÃøÁ¤À» À§ÇØ ¿©·¯¹ø ÆŞ½º°ªÀ» ÀĞÀ½
+  while(duration == 0) // ì •í™•í•œ ì¸¡ì •ì„ ìœ„í•´ ì—¬ëŸ¬ë²ˆ í„ìŠ¤ê°’ì„ ì½ìŒ
   {
-    duration = pulseIn(dustSensor, LOW); // Pin¿¡¼­ LOW°¡ µÉ¶§ ÆŞ½º°ªÀ» ÀĞÀ½
+    duration = pulseIn(dustSensor, LOW); // Pinì—ì„œ LOWê°€ ë ë•Œ í„ìŠ¤ê°’ì„ ì½ìŒ
     delay(500);
   }
   unsigned long lowpulseoccupancy = lowpulseoccupancy + duration;
@@ -224,41 +209,42 @@ float *DustDensity_Check() // ¹Ì¼¼¸ÕÁö ÃøÁ¤
   return dustDensity;
 }
 
-PressureSensor *Pressure_Check() // ´ë±â¾Ğ ÃøÁ¤
+PressureSensor *Pressure_Check() // ëŒ€ê¸°ì•• ì¸¡ì •
 {
   Adafruit_BMP085 bmp;
   PressureSensor *ps = (PressureSensor *)malloc(sizeof(PressureSensor));
   if (!bmp.begin(BMP085_ULTRAHIGHRES))
   {
-    Serial.println("BMP180 ¼¾¼­¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. ¿¬°áÀ» È®ÀÎÇØ ÁÖ¼¼¿ä!");
+    Serial.println("BMP180 ì„¼ì„œë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ì—°ê²°ì„ í™•ì¸í•´ ì£¼ì„¸ìš”!");
     return;
   }
 
   ps->Ftemperature = bmp.readTemperature();
   ps->Fpressure = bmp.readPressure();
-  ps->Faltitude = bmp.readAltitude(101600); // 101600 : ÀÎÃµ ¼Ûµµ ÇØ¸é±â¾Ğ, 101325 : Ç¥ÁØ±â¾Ğ
+  ps->Faltitude = bmp.readAltitude(101600); // 101600 : ì¸ì²œ ì†¡ë„ í•´ë©´ê¸°ì••, 101325 : í‘œì¤€ê¸°ì••, ê° ì§€ì—­ë³„ ê¸°ì••ì€ ê¸°ìƒì²­ ì°¸ê³ 
 
   dtostrf(ps->Ftemperature, 4, 2, ps->CAtemperature);
   dtostrf(ps->Fpressure, 9, 2, ps->CApressure);
   dtostrf(ps->Faltitude, 5, 2, ps->CAaltitude);
 
-  // ¿Âµµ ¾Ğ·Â °íµµ
+  // ì˜¨ë„, ì••ë ¥, ê³ ë„
   sprintf(ps->CAbuffer, "Temp(.C): %s\tPres(PA): %s\tAlt(M): %s", ps->CAtemperature, ps->CApressure, ps->CAaltitude);
   delay(1000);
 
   return ps;
 }
 
-void initLCD() // LCD ÃÊ±âÈ­
+void initLCD() // LCD ì´ˆê¸°í™”
 {
-  byte humidityImage[] = {0x04, 0x0E, 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x0E};    // ¹°¹æ¿ï ¾ÆÀÌÄÜ
-  byte temperatureImage[] = {0x04, 0x0A, 0x0A, 0x0A, 0x0E, 0x1F, 0x1F, 0x0E}; // ¿Âµµ ¾ÆÀÌÄÜ
-  byte doImage[] = {0x1C, 0x14, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00};          // ¢ª ¾ÆÀÌÄÜ
-  byte microImage[] = {0x11, 0x11, 0x11, 0x13, 0x15, 0x18, 0x10, 0x10};       //LCD "m" ÀÌ¹ÌÁö
-  byte threeImage[] = {0x18, 0x04, 0x18, 0x04, 0x18, 0x00, 0x00, 0x00};       //LCD "3" ÀÌ¹ÌÁö
+  byte humidityImage[] = {0x04, 0x0E, 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x0E};    // ë¬¼ë°©ìš¸ ì•„ì´ì½˜
+  byte temperatureImage[] = {0x04, 0x0A, 0x0A, 0x0A, 0x0E, 0x1F, 0x1F, 0x0E}; // ì˜¨ë„ ì•„ì´ì½˜
+  byte doImage[] = {0x1C, 0x14, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00};          // Ëš ì•„ì´ì½˜
+  byte microImage[] = {0x11, 0x11, 0x11, 0x13, 0x15, 0x18, 0x10, 0x10};       //LCD "m" ì´ë¯¸ì§€
+  byte threeImage[] = {0x18, 0x04, 0x18, 0x04, 0x18, 0x00, 0x00, 0x00};       //LCD "3" ì´ë¯¸ì§€
 
   lcd.init();
   lcd.backlight();
+  // LCDì— ì•„ì´ì½˜ ë° ì´ë¯¸ì§€ ë“±ë¡
   lcd.createChar(0, humidityImage);
   lcd.createChar(1, temperatureImage);
   lcd.createChar(2, doImage);
@@ -268,19 +254,17 @@ void initLCD() // LCD ÃÊ±âÈ­
   lcd.print("Loading...");
 }
 
-void printLCD(void *value, int sensorType) // LCD¿¡ Ãâ·Â, sensorTypeÀ» ÁöÁ¤ÇÏ¿© °¢ ¼¾¼­¿¡ ¸Â°Ô Ãâ·Â
+void printLCD(void *value, int sensorType) // LCDì— ì¶œë ¥, sensorTypeì„ ì§€ì •í•˜ì—¬ ê° ì„¼ì„œì— ë§ê²Œ ì¶œë ¥
 {
-  //char printBuffer[254] = "";
-
-  if (sensorType == temper_Hum)
+  if (sensorType == temper_Hum)         // ì˜¨ìŠµë„ ì„¼ì„œ
   {
-    // Serial Ãâ·Â
+    // Serial ì¶œë ¥
     Serial.print("LCD Humidity : ");
     Serial.print(((TemperHumiSensor *)value)->humi);
     Serial.print("% / Temperature : ");
     Serial.print(((TemperHumiSensor *)value)->temp);
     Serial.println(" C");
-    // LCD Ãâ·Â
+    // LCD ì¶œë ¥
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.write(0);
@@ -294,51 +278,51 @@ void printLCD(void *value, int sensorType) // LCD¿¡ Ãâ·Â, sensorTypeÀ» ÁöÁ¤ÇÏ¿© 
     lcd.write(2);
     lcd.print("C");
   }
-  else if (sensorType == ultrasonic_Trig)
+  else if (sensorType == ultrasonic_Trig)   // ì´ˆìŒíŒŒ ì„¼ì„œ
   {
     Serial.print("LCD ");
     Serial.print(*(int *)value);
     Serial.println("CM");
 
     lcd.clear();
-    lcd.setCursor(2, 0); // ¿­, Çà
+    lcd.setCursor(2, 0); // ì—´, í–‰
     lcd.print("# Distance #");
     lcd.setCursor(6, 1);
     lcd.print(*(int *)value);
     lcd.print("CM");
   }
-  else if (sensorType == illuminSensor)
+  else if (sensorType == illuminSensor)     // ì¡°ë„ ì„¼ì„œ
   {
     Serial.print("LCD Illumin : ");
     Serial.println(*(int *)value);
 
     lcd.clear();
-    lcd.setCursor(1, 0); // ¿­, Çà
+    lcd.setCursor(1, 0); // ì—´, í–‰
     lcd.print("*Illumination*");
     lcd.setCursor(6, 1);
     lcd.print(*(int *)value);
     lcd.print("LX");
   }
-  else if (sensorType == gasSensor)
+  else if (sensorType == gasSensor)         // ê°€ìŠ¤ ì„¼ì„œ
   {
     Serial.print("LCD gas(ppm) : ");
     Serial.println(*(float *)value);
 
     lcd.clear();
-    lcd.setCursor(1, 0); // ¿­, Çà
+    lcd.setCursor(1, 0); // ì—´, í–‰
     lcd.print("CarbonMonoxide");
     lcd.setCursor(5, 1);
     lcd.print(*(float *)value);
     lcd.print("PPM");
   }
-  else if (sensorType == dustSensor)
+  else if (sensorType == dustSensor)        // ë¯¸ì„¸ë¨¼ì§€ ì„¼ì„œ
   {
     Serial.print("LCD Dust : ");
     Serial.print(*(float *)value);
     Serial.println("ug/m^3");
 
     lcd.clear();
-    lcd.setCursor(2, 0); // ¿­, Çà
+    lcd.setCursor(2, 0); // ì—´, í–‰
     lcd.print("*Micro_Dust*");
     lcd.setCursor(3, 1);
     lcd.print(*(float *)value);
@@ -346,7 +330,7 @@ void printLCD(void *value, int sensorType) // LCD¿¡ Ãâ·Â, sensorTypeÀ» ÁöÁ¤ÇÏ¿© 
     lcd.write(3);
     lcd.write(4);
   }
-  else if (sensorType == pressureSensor_SCL || pressureSensor_SDA)
+  else if (sensorType == pressureSensor_SCL || pressureSensor_SDA)      // ëŒ€ê¸°ì•• ì„¼ì„œ
   {
     Serial.print("LCD ");
     Serial.println(((PressureSensor *)value)->CAbuffer);
@@ -367,7 +351,7 @@ void printLCD(void *value, int sensorType) // LCD¿¡ Ãâ·Â, sensorTypeÀ» ÁöÁ¤ÇÏ¿© 
   }
 }
 
-// function that executes whenever data is received from master
+// ë§ˆìŠ¤í„°ë¡œë¶€í„° ë°ì´í„° ìˆ˜ì‹ ì‹œ í˜¸ì¶œ
 void receiveEvent(int howMany)
 {
   while (0 < Wire.available())
@@ -379,183 +363,178 @@ void receiveEvent(int howMany)
   //Serial.println(); // to newline //
 }
 
-// function that executes whenever data is requested from master
+// ë§ˆìŠ¤í„°ë¡œë¶€í„° ë°ì´í„° ìš”ì²­ ë°›ì„ ì‹œ í˜¸ì¶œ
 void requestEvent()
 {
-  char c_tmp[32] = {0}; // µ¥ÀÌÅÍ Àü¼ÛÀ» À§ÇÑ ÀúÀå °ø°£
-  String s_tmp = "";    // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ ÀúÀå º¯¼ö
+  char c_tmp[32] = {0}; // ë°ì´í„° ì „ì†¡ì„ ìœ„í•œ ì €ì¥ ê³µê°„
+  String s_tmp = "";    // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì €ì¥ ë³€ìˆ˜
 
-  if (buf == "Connect...") // I2C ¿¬°á È®ÀÎ
+  if (buf == "Connect...")              // I2C ì—°ê²° í™•ì¸
   {
     Wire.write("Connect Success");
     Serial.println("Connect Success");
   }
-  else if (buf == "Update Status") // ¼¾¼­µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® À¯¹« È®ÀÎ
+  else if(buf == "Update Status")           // ì„¼ì„œë°ì´í„° ì—…ë°ì´íŠ¸ ìœ ë¬´ í™•ì¸
   {
     Serial.println("Receive : " + buf);
-    if (update == true)
+    if(update == true)                      // ì„¼ì„œ ë°ì´í„° ì—…ë°ì´íŠ¸ ì™„ë£Œì‹œ ë§ˆìŠ¤í„°ì—ê²Œ TR ì „ì†¡
     {
       Wire.write("TR");
       Serial.println("Transmission Update Status : TR");
     }
-    else if (update == false)
+    else if(update == false)                // ì„¼ì„œ ë°ì´í„° ì—…ë°ì´íŠ¸ ë¯¸ì™„ë£Œì‹œ ë§ˆìŠ¤í„°ì—ê²Œ FS ì „ì†¡
     {
       Wire.write("FS");
       Serial.println("Transmission Update Status : FS");
     }
   }
-  else if (buf == "Data Update Complete") // µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® ¿Ï·á ÇÇµå¹é ¹ŞÀ¸¸é update¸¦ false·Î º¯°æ
+  else if (buf == "GET TPH DataSize")             // ì˜¨ìŠµë„ì„¼ì„œ
   {
-    Serial.println("Data Transfer Completed !");
-    update = false;
-  }
-  else if (buf == "GET TPH DataSize") // ¿Â½Àµµ¼¾¼­
-  {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData = String(clt_dt.ths.humi);  // ½Àµµ
-    sensorData += String(clt_dt.ths.temp); // ¿Âµµ
-    s_tmp = String(sensorData.length());   // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ ÀúÀå
+    sensorData = String(clt_dt.ths.humi); // ìŠµë„
+    sensorData += String(clt_dt.ths.temp); // ì˜¨ë„
+    s_tmp = String(sensorData.length()); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì €ì¥
     Serial.println("Transmission SensorDataSize : " + s_tmp);
-    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
-    Wire.write(c_tmp);                            // Àü¼Û
+    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
   else if (buf == "GET TPH")
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData.toCharArray(c_tmp, sensorData.length() + 1); // ¼öÁıµÈ ¼¾¼­ µ¥ÀÌÅÍ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
+    sensorData.toCharArray(c_tmp, sensorData.length() + 1);   // ìˆ˜ì§‘ëœ ì„¼ì„œ ë°ì´í„° ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
     Serial.println("Transmission TPH : " + sensorData);
-    Wire.write(c_tmp);
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
-  else if (buf == "GET UTW DataSize") // ÃÊÀ½ÆÄ¼¾¼­
+  else if (buf == "GET UTW DataSize")           // ì´ˆìŒíŒŒì„¼ì„œ
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData = String(clt_dt.distance); // ÃÊÀ½ÆÄ¼¾¼­ °Å¸®
-    s_tmp = String(sensorData.length());  // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ ÀúÀå
+    sensorData = String(clt_dt.distance); // ì´ˆìŒíŒŒì„¼ì„œ ê±°ë¦¬
+    s_tmp = String(sensorData.length()); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì €ì¥
     Serial.println("Transmission SensorDataSize : " + s_tmp);
-    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
-    Wire.write(c_tmp);                            // Àü¼Û
+    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
   else if (buf == "GET UTW")
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData.toCharArray(c_tmp, sensorData.length() + 1); // ¼öÁıµÈ ¼¾¼­ µ¥ÀÌÅÍ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
+    sensorData.toCharArray(c_tmp, sensorData.length() + 1);   // ìˆ˜ì§‘ëœ ì„¼ì„œ ë°ì´í„° ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
     Serial.println("Transmission UTW : " + sensorData);
-    Wire.write(c_tmp);
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
-  else if (buf == "GET DST DataSize") // ¹Ì¼¼¸ÕÁö¼¾¼­
+  else if (buf == "GET DST DataSize")           // ë¯¸ì„¸ë¨¼ì§€ì„¼ì„œ
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData = String(clt_dt.dustDensity); // ¹Ì¼¼¸ÕÁö °ª
-    s_tmp = String(sensorData.length());     // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ ÀúÀå
+    sensorData = String(clt_dt.dustDensity); // ë¯¸ì„¸ë¨¼ì§€ ê°’
+    s_tmp = String(sensorData.length()); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì €ì¥
     Serial.println("Transmission SensorDataSize : " + s_tmp);
-    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
-    Wire.write(c_tmp);                            // Àü¼Û
+    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
   else if (buf == "GET DST")
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData.toCharArray(c_tmp, sensorData.length() + 1); // ¼öÁıµÈ ¼¾¼­ µ¥ÀÌÅÍ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
+    sensorData.toCharArray(c_tmp, sensorData.length() + 1);   // ìˆ˜ì§‘ëœ ì„¼ì„œ ë°ì´í„° ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
     Serial.println("Transmission DST : " + sensorData);
-    Wire.write(c_tmp);
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
-  else if (buf == "GET GAS DataSize") // °¡½º¼¾¼­
+  else if (buf == "GET GAS DataSize")           // ê°€ìŠ¤ì„¼ì„œ
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData = String(clt_dt.ppm);     // °¡½º¼¾¼­ °ª
-    s_tmp = String(sensorData.length()); // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ ÀúÀå
+    sensorData = String(clt_dt.ppm); // ê°€ìŠ¤ì„¼ì„œ ê°’
+    s_tmp = String(sensorData.length()); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì €ì¥
     Serial.println("Transmission SensorDataSize : " + s_tmp);
-    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
-    Wire.write(c_tmp);                            // Àü¼Û
+    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
   else if (buf == "GET GAS")
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData.toCharArray(c_tmp, sensorData.length() + 1); // ¼öÁıµÈ ¼¾¼­ µ¥ÀÌÅÍ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
+    sensorData.toCharArray(c_tmp, sensorData.length() + 1);   // ìˆ˜ì§‘ëœ ì„¼ì„œ ë°ì´í„° ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
     Serial.println("Transmission GAS : " + sensorData);
-    Wire.write(c_tmp);
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
-  else if (buf == "GET ILM DataSize") // Á¶µµ¼¾¼­
+  else if (buf == "GET ILM DataSize")           // ì¡°ë„ì„¼ì„œ
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData = String(clt_dt.illumin_Value); // Á¶µµ¼¾¼­ °ª
-    s_tmp = String(sensorData.length());       // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ ÀúÀå
+    sensorData = String(clt_dt.illumin_Value); // ì¡°ë„ì„¼ì„œ ê°’
+    s_tmp = String(sensorData.length()); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì €ì¥
     Serial.println("Transmission SensorDataSize : " + s_tmp);
-    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
-    Wire.write(c_tmp);                            // Àü¼Û
+    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
   else if (buf == "GET ILM")
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData.toCharArray(c_tmp, sensorData.length() + 1); // ¼öÁıµÈ ¼¾¼­ µ¥ÀÌÅÍ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
+    sensorData.toCharArray(c_tmp, sensorData.length() + 1);   // ìˆ˜ì§‘ëœ ì„¼ì„œ ë°ì´í„° ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
     Serial.println("Transmission ILM : " + sensorData);
-    Wire.write(c_tmp);
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
-  else if (buf == "GET PSS DataSize") // ´ë±â¾Ğ¼¾¼­
+  else if (buf == "GET PSS DataSize")           // ëŒ€ê¸°ì••ì„¼ì„œ
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData = String(clt_dt.CAtemperature); // ¿Âµµ
-    sensorData += String(clt_dt.CApressure);   // ±â¾Ğ
-    sensorData += String(clt_dt.CAaltitude);   // °íµµ
-    s_tmp = String(sensorData.length());       // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ ÀúÀå
+    sensorData = String(clt_dt.CAtemperature); // ì˜¨ë„
+    sensorData += String(clt_dt.CApressure); // ê¸°ì••
+    sensorData += String(clt_dt.CAaltitude); // ê³ ë„
+    s_tmp = String(sensorData.length()); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì €ì¥
     Serial.println("Transmission SensorDataSize : " + s_tmp);
-    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ¼¾¼­ µ¥ÀÌÅÍ ±æÀÌ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
-    Wire.write(c_tmp);                            // Àü¼Û
+    s_tmp.toCharArray(c_tmp, s_tmp.length() + 1); // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ê¸¸ì´ ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
   }
   else if (buf == "GET PSS")
   {
-    digitalWrite(ledRED, HIGH); // LED ON
+    digitalWrite(ledRED, HIGH);   // LED ON
     delay(2000);
     Serial.println("Receive : " + buf);
-    sensorData.toCharArray(c_tmp, sensorData.length() + 1); // ¼öÁıµÈ ¼¾¼­ µ¥ÀÌÅÍ Á¤º¸ Àü¼ÛÀ» À§ÇØ ¹è¿­¿¡ ÀúÀå
+    sensorData.toCharArray(c_tmp, sensorData.length() + 1);   // ìˆ˜ì§‘ëœ ì„¼ì„œ ë°ì´í„° ì •ë³´ ì „ì†¡ì„ ìœ„í•´ ë°°ì—´ì— ì €ì¥
     Serial.println("Transmission PSS : " + sensorData);
-    Wire.write(c_tmp);
+    Wire.write(c_tmp);           // ì„¼ì„œ ë°ì´í„° ì „ì†¡
     delay(2000);
-    digitalWrite(ledRED, LOW); // LED OFF
+    digitalWrite(ledRED, LOW);   // LED OFF
     update = false;
   }
-  buf = ""; // ¹öÆÛ ÃÊ±âÈ­
+  buf = ""; // ë²„í¼ ì´ˆê¸°í™”
 }
